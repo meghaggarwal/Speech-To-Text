@@ -16,13 +16,7 @@ from six.moves import queue
 
 RATE = 16000
 CHUNK = int(RATE / 10)
-
-# def signal_handler(signal, frame):
-#     print("\nprogram exiting gracefully")
-#     sys.exit(0)
-
-
-# signal.signal(signal.SIGINT, signal_handler)
+language_code = "en-US"
 
 class Conversation:
 
@@ -57,6 +51,7 @@ class Conversation:
             num_chars_printed = len(transcript)
 
         else:
+
             return transcript + overwrite_chars
 
             # Exit recognition if any of the transcribed phrases could be
@@ -68,25 +63,14 @@ class Conversation:
             num_chars_printed = 0
 
   def _speech_to_text(self, content):
-
+    print("speech to text...")
     self.content = content
 
-    language_code = "en-US"  # a BCP-47 language tag
-
-    self.client = speech.SpeechClient()
-    self.config = speech.RecognitionConfig(
-        encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
-        sample_rate_hertz=RATE,
-        language_code=language_code,
-    )
-
-    self.streaming_config = speech.StreamingRecognitionConfig(
-        config=self.config, interim_results=True
-    )
-
-    self.requests = speech.StreamingRecognizeRequest(audio_content=self.content)
-        
+    self.requests = ( speech.StreamingRecognizeRequest(audio_content=self.content))
+    print(self.requests)
     self.responses = self.client.streaming_recognize(self.streaming_config, self.requests)
+    print(self.responses)
+    print("I will print responses")
 
     # Now, put the transcription responses to use.
     
@@ -98,7 +82,17 @@ class Conversation:
     self.s = s
     #self._asr =  Asr()
     #self._tts = TTS()
-    self._q = queue.Queue() # ASR + TTS pipeline
+    self._q = queue.Queue()
+    self.client = speech.SpeechClient()
+    self.config = speech.RecognitionConfig(
+        encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
+        sample_rate_hertz=RATE,
+        language_code=language_code,
+    )
+
+    self.streaming_config = speech.StreamingRecognitionConfig(
+        config=self.config, interim_results=True
+    ) # ASR + TTS pipeline
     # threading.Thread(target=self.__send).start()
     # self.__recv()
     print(s)
@@ -126,7 +120,6 @@ class Conversation:
     while True:
      
       data = self.conn.recv(4096)
-      print(data)
       print("Here is the above data")
       data = self._speech_to_text(data)
       self._q.put(data)
