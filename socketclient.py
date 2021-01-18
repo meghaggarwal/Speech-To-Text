@@ -114,7 +114,7 @@ print('Socket Connected to ' + host + ' on ip ' + remote_ip)
 #Send some data to remote server
 print("Record your message...")
 def send_client_data(s):
-    try:
+    try play:
       with MicrophoneStream(RATE, CHUNK) as stream:
         audio_generator = stream.generator()
         for content in audio_generator:
