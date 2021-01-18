@@ -14,7 +14,7 @@ import sys
 from google.cloud import speech
 
 import pyaudio
-from six.moves import queue
+import queue
 
 
 RATE = 16000
@@ -43,8 +43,6 @@ class MicrophoneStream(object):
         )
 
         self.closed = False
-
-
 
         return self
 
@@ -80,7 +78,9 @@ class MicrophoneStream(object):
                 except queue.Empty:
                     break
 
-            yield b"".join(data)
+            d =  b"".join(data)
+            print("Sendining..", len(d))
+            yield d
 
 host = 'localhost'
 port = 8888
@@ -114,21 +114,19 @@ print('Socket Connected to ' + host + ' on ip ' + remote_ip)
 #Send some data to remote server
 print("Record your message...")
 def send_client_data(s):
-  while True:
     try:
-      # message = input()
-      try:
-        with MicrophoneStream(RATE, CHUNK) as stream:
-          audio_generator = stream.generator()
-          s.sendall(next(audio_generator))
-      except socket.error:
-        #Send failed
-        print('Sending failed')
-        sys.exit()
+      with MicrophoneStream(RATE, CHUNK) as stream:
+        audio_generator = stream.generator()
+        for content in audio_generator:
+          s.sendall(content)
+    except socket.error:
+      #Send failed
+      print('Sending failed')
+      sys.exit()
 
-    except KeyboardInterrupt:
-      print("Key Interrupt...Stopping the client side...")
-      break
+    # except KeyboardInterrupt:
+    #   print("Key Interrupt...Stopping the client side...")
+    #   break
     
  
 def recv_client_data(s):
