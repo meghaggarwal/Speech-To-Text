@@ -4,6 +4,7 @@ import threading
 from conversation import Conversation
 import sys, signal
 import time
+import wave
 
 
 
@@ -30,29 +31,38 @@ print('Socket now listening')
 def terminate():
 		global running_flag
 		try:
-			time.sleep(5)
+			time.sleep(5000)
 			# self._q.put(None)
 		except KeyboardInterrupt:
 			print("Program Exited Gracefully...")
 			running_flag = False
 
 
-while(1):
+def server():
 	try:
-		s.settimeout(5)
-		try:
-			conn, addr = s.accept()
-			print("Connected with" + addr[0] + ':' + str(addr[1]))
-			c = Conversation(conn, s)
-			threading.Thread(target=c, daemon=True).start()
+		while(1):
+			s.settimeout(5)
+			try:
+				conn, addr = s.accept()
+				print("Connected with" + addr[0] + ':' + str(addr[1]))
+				c = Conversation(conn, s)
+				threading.Thread(target=c, daemon=True).start()
 
-		except socket.timeout:
-			terminate()
-			if not running_flag:
-				break
+			except socket.timeout:
+				if not running_flag:
+					break
 
-	except KeyboardInterrupt as e:
-		print("Server has stopped...")
-		break
-	
-s.close()
+		# except KeyboardInterrupt as e:
+		# 	print("Server has stopped...")
+		# 	break
+
+	finally:
+		s.close()
+			
+
+		
+
+threading.Thread(target=server, daemon=True).start()
+terminate()
+		
+
